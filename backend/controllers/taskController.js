@@ -5,10 +5,10 @@ const { v4: uuidv4 } = require("uuid");
 
 exports.CreateTask = async (req, res) => {
     const taskId = uuidv4();
-    console.log();
-    
+    const reqBody = req.query;
+    const taskData = {taskId, ...reqBody}
     try {
-        const task = await Task.create(req.query);
+        const task = await Task.create(taskData);
         res.status(201).json(task);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -17,9 +17,6 @@ exports.CreateTask = async (req, res) => {
 
 //Get All Tasks
 exports.GetTasks = async (req, res) => {
-
-    return res.send("API is running...")
-    
     try {
         const tasks = await Task.find();
         res.json(tasks);
@@ -32,7 +29,7 @@ exports.GetTasks = async (req, res) => {
 
 exports.UpdateTask = async (req, res) => {
     try {
-        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const task = await Task.findOneAndUpdate({taskId:req.params.id}, req.query, { new: true });
         if (!task) return res.status(404).json({ message: "Task not found" });
         res.json(task);
     } catch (error) {
@@ -43,7 +40,7 @@ exports.UpdateTask = async (req, res) => {
 //Delete a Task
 exports.DeleteTask = async (req, res) => {
     try {
-        const task = await Task.findByIdAndDelete(req.params.id);
+        const task = await Task.findOneAndDelete(req.params.id);
         if (!task) return res.status(404).json({ message: "Task not found" });
         res.json({ message: "Task deleted successfully" });
     } catch (error) {
